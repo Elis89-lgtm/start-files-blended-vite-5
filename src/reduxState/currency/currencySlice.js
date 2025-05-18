@@ -1,8 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchBaseCurrency } from './operations';
-
+import {
+  fetchBaseCurrency,
+  fetchExchangeInfo,
+  fetchLatestSymbols,
+} from './operations';
 const initialState = {
   baseCurrency: '',
+  exchangeInfo: null,
+  isLoading: false,
+  error: null,
+  rates: [],
 };
 
 const currencySlice = createSlice({
@@ -15,9 +22,36 @@ const currencySlice = createSlice({
     },
   },
   extraReducers: builder =>
-    builder.addCase(fetchBaseCurrency.fulfilled, (state, { payload }) => {
-      state.baseCurrency = payload;
-    }),
+    builder
+      .addCase(fetchBaseCurrency.fulfilled, (state, { payload }) => {
+        state.baseCurrency = payload;
+      })
+      .addCase(fetchExchangeInfo.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchExchangeInfo.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.exchangeInfo = payload;
+      })
+      .addCase(fetchExchangeInfo.rejected, (state, { payload }) => {
+        state.isLoading = false;
+        state.error = payload;
+        state.exchangeInfo = null;
+      })
+      .addCase(fetchLatestSymbols.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchLatestSymbols.fulfilled, (state, { payload }) => {
+        state.isLoading = false;
+        state.rates = payload;
+      })
+      .addCase(fetchLatestSymbols.rejected, (state, { payload }) => {
+        state.isLoading = false;
+        state.error = payload;
+        state.rates = null;
+      }),
 });
 
 export const { setBaseCurrency } = currencySlice.actions;
